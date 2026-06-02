@@ -5,8 +5,8 @@
 #include <WiFi.h>
 #include <WebServer.h>
 
-const char* ssid = "WiFiAdi";
-const char* password = "WiFiSifresi";
+const char* ssid = "Sera";
+const char* password = "12345678";
 
 #define DHTPIN 14
 #define DHTTYPE DHT22
@@ -54,13 +54,8 @@ void setup() {
   u8g2.drawStr(10, 35, "Sistem Baslatiliyor...");
   u8g2.sendBuffer();
 
-  WiFi.begin(ssid, password);
-
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-  }
-
-  Serial.println(WiFi.localIP());
+  WiFi.softAP(ssid, password);
+  Serial.println(WiFi.softAPIP());
 
   server.on("/", anaSayfa);
   server.on("/sicaklik", sicaklikGonder);
