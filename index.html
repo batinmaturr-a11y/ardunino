@@ -4,23 +4,80 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sera</title>
-</head>
-<body>
-  <span id="sicaklik">--</span> C
-
-  <script>
-    async function guncelle() {
-      try {
-        const cevap = await fetch("/sicaklik");
-        const sicaklik = await cevap.text();
-        document.getElementById("sicaklik").textContent = sicaklik;
-      } catch (hata) {
-        document.getElementById("sicaklik").textContent = "--";
-      }
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 16px;
     }
 
-    guncelle();
-    setInterval(guncelle, 2000);
+    .kart {
+      border: 1px solid #ccc;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    input, button, select {
+      padding: 8px;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="kart">Sıcaklık: <span id="sicaklik">--</span>°C</div>
+  <div class="kart">Nem: %<span id="nem">--</span></div>
+  <div class="kart">Fan durumu: <span id="fan">--</span></div>
+
+  <div class="kart">
+    <div>Fan eşik değeri</div>
+    <input id="esik" type="number" step="0.1">
+    <button onclick="esikKaydet()">Kaydet</button>
+  </div>
+
+  <div class="kart">
+    <div>Mod</div>
+    <select id="mod" onchange="modKaydet()">
+      <option value="oto">Otomatik</option>
+      <option value="manuel">Manuel</option>
+    </select>
+  </div>
+
+  <div class="kart" id="manuelAlan">
+    <div>Manuel fan kontrolü</div>
+    <button onclick="fanAyarla(1)">Aç</button>
+    <button onclick="fanAyarla(0)">Kapat</button>
+  </div>
+
+  <script>
+    async function veriAl() {
+      const cevap = await fetch("/veri");
+      const veri = await cevap.json();
+      document.getElementById("sicaklik").textContent = veri.sicaklik;
+      document.getElementById("nem").textContent = veri.nem;
+      document.getElementById("fan").textContent = veri.fan;
+      document.getElementById("esik").value = veri.esik;
+      document.getElementById("mod").value = veri.mod;
+      document.getElementById("manuelAlan").style.display = veri.mod === "manuel" ? "block" : "none";
+    }
+
+    async function esikKaydet() {
+      const esik = document.getElementById("esik").value;
+      await fetch("/esik?deger=" + encodeURIComponent(esik));
+      veriAl();
+    }
+
+    async function modKaydet() {
+      const mod = document.getElementById("mod").value;
+      await fetch("/mod?deger=" + encodeURIComponent(mod));
+      veriAl();
+    }
+
+    async function fanAyarla(durum) {
+      await fetch("/fan?durum=" + durum);
+      veriAl();
+    }
+
+    veriAl();
+    setInterval(veriAl, 2000);
   </script>
 </body>
 </html>
